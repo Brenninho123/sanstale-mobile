@@ -2,6 +2,6 @@
 
 An Undertale Fangame written in Love2D.
 
-I'm going to try my best to continue this.
+Created by someone years ago who has since wiped their GitHub account.
 
 (Feel free to fork this)
