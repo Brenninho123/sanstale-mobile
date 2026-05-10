@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: "17"
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -36,56 +36,22 @@ jobs:
       - name: Package game as .love
         run: |
           zip -9 -r love-android/app/src/main/assets/game.love . \
-            -x "*.git*"        \
-            -x ".github/*"     \
-            -x "android.yml"   \
-            -x "makefile"      \
-            -x "README*"       \
-            -x "LICENSE"       \
-            -x "love-android/*"
-
-      - name: Grant gradlew permission
-        working-directory: love-android
-        run: chmod +x gradlew
+            -x "*.git*" \
+            -x ".github/*" \
+            -x "love-android/*" \
+            -x "makefile" \
+            -x "README*" \
+            -x "LICENSE"
 
       - name: Build debug APK
         working-directory: love-android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload debug APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: sanstale-mobile-debug
           path: love-android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-
-      # --- Release signing (optional, requires repo secrets) ---
-      - name: Sign and build release APK
-        if: >
-          github.event_name == 'push' &&
-          github.ref == 'refs/heads/master' &&
-          secrets.KEYSTORE_BASE64 != ''
-        working-directory: love-android
-        env:
-          STORE_FILE_B64: ${{ secrets.KEYSTORE_BASE64 }}
-          STORE_PASS:     ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS:      ${{ secrets.KEY_ALIAS }}
-          KEY_PASS:       ${{ secrets.KEY_PASSWORD }}
-        run: |
-          echo "$STORE_FILE_B64" | base64 -d > keystore.jks
-          ./gradlew assembleRelease --no-daemon \
-            -Pandroid.injected.signing.store.file="$(pwd)/keystore.jks" \
-            -Pandroid.injected.signing.store.password="$STORE_PASS"     \
-            -Pandroid.injected.signing.key.alias="$KEY_ALIAS"           \
-            -Pandroid.injected.signing.key.password="$KEY_PASS"
-
-      - name: Upload release APK
-        if: >
-          github.event_name == 'push' &&
-          github.ref == 'refs/heads/master' &&
-          secrets.KEYSTORE_BASE64 != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: sanstale-mobile-release
-          path: love-android/app/build/outputs/apk/release/*.apk
-          if-no-files-found: warn
