@@ -25,13 +25,15 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install NDK r25c
+      - name: Install NDK and CMake
         run: |
           yes | sdkmanager --licenses > /dev/null 2>&1
-          sdkmanager "ndk;25.2.9519653"
+          sdkmanager \
+            "ndk;25.2.9519653" \
+            "cmake;3.22.1"
 
-      - name: Clone love-android
-        run: git clone --depth 1 https://github.com/love2d/love-android love-android
+      - name: Clone love-android 11.5
+        run: git clone --depth 1 --branch 11.5.2 https://github.com/love2d/love-android love-android
 
       - name: Package game as .love
         run: |
@@ -48,7 +50,7 @@ jobs:
         working-directory: love-android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --warning-mode all --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
