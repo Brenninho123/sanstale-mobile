@@ -32,8 +32,12 @@ jobs:
             "ndk;25.2.9519653" \
             "cmake;3.22.1"
 
-      - name: Clone love-android 11.5
-        run: git clone --depth 1 --branch 11.5.2 https://github.com/love2d/love-android love-android
+      - name: Clone love-android 11.5a
+        run: |
+          git clone --branch 11.5a \
+            https://github.com/love2d/love-android love-android
+          cd love-android
+          git submodule update --init --force --recursive --depth 1
 
       - name: Package game as .love
         run: |
